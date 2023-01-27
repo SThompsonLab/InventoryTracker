@@ -97,7 +97,10 @@ sub_df = df.copy()
 
 users = list(df["User"].unique())
 companies = list(df["Company"].unique())
-new_order_id = max(df["Order_id"])+1
+try:
+    new_order_id = max(df["Order_id"])+1
+except:
+    new_order_id = 1
 
 log_header = [
     "Date",
@@ -155,13 +158,13 @@ material_entry_column = [
     sg.In(size=(15, 4), key="-po-")
     ],
     [sg.Text("Location"),
-    sg.Combo(locations, key = "-location-"),
+    sg.Combo(locations, size = (30, 1),key = "-location-"),
     sg.Push(),
     sg.Text("Status"),
     sg.Combo(statuses, key = "-status-", default_value = statuses[0]),
     sg.Button("Update"),],
     sg.Text("Notes"),
-    sg.Multiline(size = (40,5), default_text = wd, key = "-notes-"),
+    sg.Multiline(size = (40,5), default_text = "None", key = "-notes-"),
     sg.Push(),
 ]
 # Third column shows the item image and the procedurally generated description
@@ -289,7 +292,7 @@ while True:
         window["-address-"].update("")
         window["-orderID-"].update(new_order_id)
 
-    elif event == "Update":
+    elif event == "Update" and "the_order" in locals():
         #updated_order = values["-orderID-"]
         #print("Updating order "+updated_order)
         #print(df.loc[df.Order_id == int(updated_order),])
@@ -337,7 +340,7 @@ while True:
         new_order_id = max(sub_df["Order_id"])+1
         window["-orderID-"].update(new_order_id)
 
-    elif event == "Add" and len(values["-name-"]) > 1:
+    elif event == "Add" and len(values["-name-"]) > 1 :
         new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
         new_price_str = str(round(new_price, 2))
         window["-total_price-"].update(new_price_str)
@@ -362,22 +365,7 @@ while True:
         sub_df = df.copy()
         sort_slice("Date", False, sub_df, 0, False)
         new_order_id = max(df["Order_id"])+1
-        window["-date-"].update(date.today())
-        window["-name-"].update("")
-        window["-user-"].update("")
-        window["-company-"].update("")
-        window["-catalog-"].update("")
-        window["-desc-"].update("")
-        window["-unit_price-"].update(0.00)
-        window["-unit_number-"].update(1)
-        window["-total_price-"].update(0.00)
-        window["-req-"].update("")
-        window["-po-"].update("")
-        window["-status-"].update("Submitted")
-        window["-location-"].update("")
-        window["-notes-"].update("")
-        window["-address-"].update("")
-        window["-orderID-"].update(new_order_id)
+
 
     elif event == "Search":
         #print(values["-search-"])
