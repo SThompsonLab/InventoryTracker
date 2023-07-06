@@ -67,7 +67,7 @@ def sort_slice(button, asendit, dataframe, starting, rick):
 # Define starting variables
 description="Random inventory object"
 
-wd = os.getcwd()
+#wd = os.getcwd()
 
 # Opens the inventory csv as a dataframe or creates a new one
 if ".inventory.csv" in os.listdir():
@@ -96,11 +96,13 @@ else:
 sub_df = df.copy()
 
 users = list(df["User"].unique())
+firt_user = 0
+
+u_statuses = list(df["Status"].unique())
+first_status = 0
+
 companies = list(df["Company"].unique())
-try:
-    new_order_id = max(df["Order_id"])+1
-except:
-    new_order_id = 1
+new_order_id = max(df["Order_id"])+1
 
 log_header = [
     "Date",
@@ -124,10 +126,10 @@ ascend = True
 #-------------------------------------------------------------------------------
 material_entry_column = [
     [sg.Text("Product name"),
-    sg.In(size=(20, 2), key="-name-"),
+    sg.In(size=(49, 2), key="-name-"),
     sg.Push(),
     sg.Text("Company"),
-    sg.Combo(companies, size=(15, 2), key="-company-"),
+    sg.Combo(companies, size=(15, 5), key="-company-"),
     sg.Push(),
     sg.Text("Catalog number"),
     sg.In(size=(15, 2), key="-catalog-")],
@@ -148,7 +150,7 @@ material_entry_column = [
     sg.Text("Date"),
     sg.In(default_text = date,size=(15, 2), key="-date-")],
     [sg.Text("User"),
-    sg.Combo(users, size = (10, 1), key = "-user-"),
+    sg.Combo(users, size = (20, 1), key = "-user-"),
     sg.Push(),
     sg.Push(),
     sg.Push(),
@@ -158,13 +160,13 @@ material_entry_column = [
     sg.In(size=(15, 4), key="-po-")
     ],
     [sg.Text("Location"),
-    sg.Combo(locations, size = (30, 1),key = "-location-"),
+    sg.Combo(locations, key = "-location-"),
     sg.Push(),
     sg.Text("Status"),
     sg.Combo(statuses, key = "-status-", default_value = statuses[0]),
     sg.Button("Update"),],
     sg.Text("Notes"),
-    sg.Multiline(size = (40,5), default_text = "None", key = "-notes-"),
+    sg.Multiline(size = (40,5), default_text = "", key = "-notes-"),
     sg.Push(),
 ]
 # Third column shows the item image and the procedurally generated description
@@ -216,7 +218,7 @@ layout=[
     sg.Input("", key="-search-"),
     sg.Push(),
     sg.Button("New"),
-    sg.Button("Add"),
+    sg.Button("Submit"),
     sg.Button("Reorder"),
     sg.Push(),
     sg.Text("Order#"),
@@ -292,7 +294,7 @@ while True:
         window["-address-"].update("")
         window["-orderID-"].update(new_order_id)
 
-    elif event == "Update" and "the_order" in locals():
+    elif event == "Update":
         #updated_order = values["-orderID-"]
         #print("Updating order "+updated_order)
         #print(df.loc[df.Order_id == int(updated_order),])
@@ -340,7 +342,7 @@ while True:
         new_order_id = max(sub_df["Order_id"])+1
         window["-orderID-"].update(new_order_id)
 
-    elif event == "Add" and len(values["-name-"]) > 1 :
+    elif event == "Submit" and len(values["-name-"]) > 1:
         new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
         new_price_str = str(round(new_price, 2))
         window["-total_price-"].update(new_price_str)
@@ -365,11 +367,31 @@ while True:
         sub_df = df.copy()
         sort_slice("Date", False, sub_df, 0, False)
         new_order_id = max(df["Order_id"])+1
-
+        window["-date-"].update(date.today())
+        window["-name-"].update("")
+        window["-user-"].update("")
+        window["-company-"].update("")
+        window["-catalog-"].update("")
+        window["-desc-"].update("")
+        window["-unit_price-"].update(0.00)
+        window["-unit_number-"].update(1)
+        window["-total_price-"].update(0.00)
+        window["-req-"].update("")
+        window["-po-"].update("")
+        window["-status-"].update("Submitted")
+        window["-location-"].update("")
+        window["-notes-"].update("")
+        window["-address-"].update("")
+        window["-orderID-"].update(new_order_id)
 
     elif event == "Search":
         #print(values["-search-"])
-        sub_df = df[df["Product Name"].str.contains(values["-search-"])].copy()
+        #sub_df = df
+        #sub_df["Product Name"] = sub_df["Product Name"].str.lower()
+        #print(sub_df["Product Name"])
+        jimmy = values["-search-"].lower()
+        #print(jimmy)
+        sub_df = df[df["Product Name"].str.lower().str.contains(jimmy)].copy()
         #print(sub_df)
         sort_slice("Date", ascend, sub_df, 0, False)
 
@@ -411,12 +433,26 @@ while True:
 
     elif event == "-user_button-":
         buttoni = "User"
+        #print(users)
+        #print(firt_user)
+        #print(users[firt_user])
+        sub_df = df[df["User"].str.contains(users[firt_user])].copy()
+        if firt_user == len(users)-1:
+            firt_user = 0
+        else:
+            firt_user+=1
         sort_slice(buttoni, ascend, sub_df, 0, True)
         ascend = asendee
         sub_df = sub_dataframe
 
     elif event == "-status_button-":
         buttoni = "Status"
+        sub_df = df[df["Status"].str.contains(u_statuses[first_status])].copy()
+        if first_status == len(u_statuses)-1:
+            first_status = 0
+        else:
+            first_status+=1
+
         sort_slice(buttoni, ascend, sub_df, 0, True)
         ascend = asendee
         sub_df = sub_dataframe
