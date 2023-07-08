@@ -12,26 +12,6 @@ import pandas as pd
 sg.theme('DarkGreen')
 #-------------------------------------------------------------------------------
 
-def popup_location():
-    layout=[[
-    sg.Text("You've entered an item as 'Recieved' without a location. Please select or enter a location."),
-    sg.Combo(locations, key = "-location2-"),
-    sg.Button("Enter")],
-    ]
-    window2 = sg.Window("Select a Location", layout = layout)
-    while True:
-        event2, values2 = window2.read()
-        if event2 == "Exit" or event2 == sg.WIN_CLOSED:
-            window2.close()
-            del window2
-        elif event2 == "Enter" and len(values2["-location2-"]):
-            #return values2["-location2-"]
-            window2.close()
-
-    window2.close()
-    del window2
-
-
 def sort_slice(button, asendit, dataframe, starting, rick):
     start_slice = 0
     global asendee
@@ -67,7 +47,7 @@ def sort_slice(button, asendit, dataframe, starting, rick):
 # Define starting variables
 description="Random inventory object"
 
-#wd = os.getcwd()
+wd = os.getcwd()
 
 # Opens the inventory csv as a dataframe or creates a new one
 if ".inventory.csv" in os.listdir():
@@ -92,6 +72,13 @@ else:
                 "Web address" : []
     }
     df = pd.DataFrame(data = tempDF)
+
+if ".lock_file" in os.listdir():
+    locked_file = True
+else:
+    locked_file = False
+    with open('.lock_file', 'w') as f:
+        f.write("File locked")
 
 sub_df = df.copy()
 
@@ -166,7 +153,7 @@ material_entry_column = [
     sg.Combo(statuses, key = "-status-", default_value = statuses[0]),
     sg.Button("Update"),],
     sg.Text("Notes"),
-    sg.Multiline(size = (40,5), default_text = "", key = "-notes-"),
+    sg.Multiline(size = (40,5), default_text = wd, key = "-notes-"),
     sg.Push(),
 ]
 # Third column shows the item image and the procedurally generated description
@@ -233,241 +220,336 @@ layout=[
 
 
 #-------------------------------------------------------------------------------
-window=sg.Window("Lab Inventory System", layout)
-start_slice = 0
-ascend = True
-buttoni = "Date"
-
-# This while true loop is where all the magic happens
-while True:
-    # events and values are read as the first thing
-    event, values = window.read()
-
-    # If the exit button is pressed or the window is otherwise closed, the loop breaks
-    if event == "Exit" or event == sg.WIN_CLOSED:
-        break
-
-#    elif event == "Update" and values["-status-"] == "Received" and values["-location-"] == "":
-#        popup_location()
-
-    elif event.startswith("R") and event != "Reorder":
-        bingo = int(event[1:])
-        try:
-            the_order = sub_df.iloc[bingo]["Order_id"]
-            #print(sub_df.loc[sub_df["Order_id"] == the_order])
-            window["-date-"].update(sub_df.iloc[bingo]["Date"])
-            window["-name-"].update(sub_df.iloc[bingo]["Product Name"])
-            window["-user-"].update(sub_df.iloc[bingo]["User"])
-            window["-company-"].update(sub_df.iloc[bingo]["Company"])
-            window["-catalog-"].update(sub_df.iloc[bingo]["Catalog number"])
-            window["-desc-"].update(sub_df.iloc[bingo]["Description"])
-            window["-unit_price-"].update(sub_df.iloc[bingo]["Unit price"])
-            window["-unit_number-"].update(sub_df.iloc[bingo]["Number"])
-            window["-total_price-"].update(sub_df.iloc[bingo]["Total price"])
-            window["-req-"].update(sub_df.iloc[bingo]["Req #"])
-            window["-po-"].update(sub_df.iloc[bingo]["PO #"])
-            window["-status-"].update(sub_df.iloc[bingo]["Status"])
-            window["-location-"].update(sub_df.iloc[bingo]["Location"])
-            window["-notes-"].update(sub_df.iloc[bingo]["Notes"])
-            window["-address-"].update(sub_df.iloc[bingo]["Web address"])
-            window["-orderID-"].update(sub_df.iloc[bingo]["Order_id"])
-        except:
-            pass
+if locked_file:
+    layout=[[
+    sg.Text("BLIS has detected a locked file, suggesting another instance is running from this directory. \n Please close all other instances before running BLIS to avoid overwriting other members' changes."),
+    ], [sg.Push(), sg.Button("OK"), sg.Push()],
+    ]
+    window = sg.Window("Select a Location", layout = layout)
+    while True:
+        event, values = window.read()
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            window.close()
+            del window
+        elif event == "OK":
+            #return values2["-location2-"]
+            window.close()
 
 
-    elif event == "New":
-        print("Newing")
-        window["-date-"].update(date.today())
-        window["-name-"].update("")
-        window["-user-"].update("")
-        window["-company-"].update("")
-        window["-catalog-"].update("")
-        window["-desc-"].update("")
-        window["-unit_price-"].update(0.00)
-        window["-unit_number-"].update(1)
-        window["-total_price-"].update(0.00)
-        window["-req-"].update("")
-        window["-po-"].update("")
-        window["-status-"].update("Submitted")
-        window["-location-"].update("")
-        window["-notes-"].update("")
-        window["-address-"].update("")
-        window["-orderID-"].update(new_order_id)
+else:
+    window=sg.Window("Lab Inventory System", layout)
+    start_slice = 0
+    ascend = True
+    buttoni = "Date"
 
-    elif event == "Update":
-        #updated_order = values["-orderID-"]
-        #print("Updating order "+updated_order)
-        #print(df.loc[df.Order_id == int(updated_order),])
-        new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
-        new_price_str = str(round(new_price, 2))
-        window["-total_price-"].update(new_price_str)
-        print(values["-status-"])
-        df.loc[df.Order_id == int(values["-orderID-"]), "Date"] = values["-date-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Product Name"] = values["-name-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Company"] = values["-company-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Number"] = values["-unit_number-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Unit price"] = values["-unit_price-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Total price"] = values["-total_price-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Req #"] = values["-req-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "PO #"] = values["-po-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "User"] = values["-user-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Status"] = values["-status-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Catalog number"] = values["-catalog-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Description"] = values["-desc-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Location"] = values["-location-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Notes"] = values["-notes-"]
-        df.loc[df.Order_id == int(values["-orderID-"]), "Web address"] = values["-address-"]
-        sub_df = df.copy()
-        sort_slice("Date", False, sub_df, 0, False)
+    # This while true loop is where all the magic happens
+    while True:
+        # events and values are read as the first thing
+        event, values = window.read()
 
-    elif event == "Delete" and "the_order" in locals():
-        df = df[df.Order_id != the_order]
-        sub_df = df.copy()
-        window["-date-"].update(date.today())
-        window["-name-"].update("")
-        window["-user-"].update("")
-        window["-company-"].update("")
-        window["-catalog-"].update("")
-        window["-desc-"].update("")
-        window["-unit_price-"].update(0.00)
-        window["-unit_number-"].update(1)
-        window["-total_price-"].update(0.00)
-        window["-req-"].update("")
-        window["-po-"].update("")
-        window["-status-"].update("Submitted")
-        window["-location-"].update("")
-        window["-notes-"].update("")
-        window["-address-"].update("")
-        sort_slice("Date", False, sub_df, 0, False)
-        new_order_id = max(sub_df["Order_id"])+1
-        window["-orderID-"].update(new_order_id)
+        # If the exit button is pressed or the window is otherwise closed, the loop breaks
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
 
-    elif event == "Submit" and len(values["-name-"]) > 1:
-        new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
-        new_price_str = str(round(new_price, 2))
-        window["-total_price-"].update(new_price_str)
-        new_order = [new_order_id,
-        values["-date-"],
-        values["-name-"],
-        values["-company-"],
-        values["-unit_number-"],
-        values["-unit_price-"],
-        values["-total_price-"],
-        values["-req-"],
-        values["-po-"],
-        values["-user-"],
-        values["-status-"],
-        values["-catalog-"],
-        values["-desc-"],
-        values["-location-"],
-        values["-notes-"],
-        values["-address-"]
-        ]
-        df.loc[len(df)] = new_order
-        sub_df = df.copy()
-        sort_slice("Date", False, sub_df, 0, False)
-        new_order_id = max(df["Order_id"])+1
-        window["-date-"].update(date.today())
-        window["-name-"].update("")
-        window["-user-"].update("")
-        window["-company-"].update("")
-        window["-catalog-"].update("")
-        window["-desc-"].update("")
-        window["-unit_price-"].update(0.00)
-        window["-unit_number-"].update(1)
-        window["-total_price-"].update(0.00)
-        window["-req-"].update("")
-        window["-po-"].update("")
-        window["-status-"].update("Submitted")
-        window["-location-"].update("")
-        window["-notes-"].update("")
-        window["-address-"].update("")
-        window["-orderID-"].update(new_order_id)
+    #    elif event == "Update" and values["-status-"] == "Received" and values["-location-"] == "":
+    #        popup_location()
 
-    elif event == "Search":
-        #print(values["-search-"])
-        #sub_df = df
-        #sub_df["Product Name"] = sub_df["Product Name"].str.lower()
-        #print(sub_df["Product Name"])
-        jimmy = values["-search-"].lower()
-        #print(jimmy)
-        sub_df = df[df["Product Name"].str.lower().str.contains(jimmy)].copy()
-        #print(sub_df)
-        sort_slice("Date", ascend, sub_df, 0, False)
-
-    elif event == "-date_button-":
-        buttoni = "Date"
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        sub_df = sub_dataframe
-        ascend = asendee
-
-    elif event == "-product_button-":
-        buttoni = "Product Name"
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        ascend = asendee
-        sub_df = sub_dataframe
-
-    elif event == "-company_button-":
-        buttoni = "Company"
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        ascend = asendee
-        sub_df = sub_dataframe
-
-    elif event == "-price_button-":
-        buttoni = "Total price"
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        ascend = asendee
-        sub_df = sub_dataframe
-
-    elif event == "-req_button-":
-        buttoni = "Req #"
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        ascend = asendee
-        sub_df = sub_dataframe
-
-    elif event == "-po_button-":
-        buttoni = "PO #"
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        ascend = asendee
-        sub_df = sub_dataframe
-
-    elif event == "-user_button-":
-        buttoni = "User"
-        #print(users)
-        #print(firt_user)
-        #print(users[firt_user])
-        sub_df = df[df["User"].str.contains(users[firt_user])].copy()
-        if firt_user == len(users)-1:
-            firt_user = 0
-        else:
-            firt_user+=1
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        ascend = asendee
-        sub_df = sub_dataframe
-
-    elif event == "-status_button-":
-        buttoni = "Status"
-        sub_df = df[df["Status"].str.contains(u_statuses[first_status])].copy()
-        if first_status == len(u_statuses)-1:
-            first_status = 0
-        else:
-            first_status+=1
-
-        sort_slice(buttoni, ascend, sub_df, 0, True)
-        ascend = asendee
-        sub_df = sub_dataframe
-
-    elif event == "-next-" and len(sub_df) > start_slice+10:
-        start_slice += 10
-        sort_slice(buttoni, ascend, sub_df, start_slice, False)
-        sub_df = sub_dataframe
-
-    elif event == "-previous-" and start_slice > 0:
-        start_slice -= 10
-        sort_slice(buttoni, ascend, sub_df, start_slice, False)
-        sub_df = sub_dataframe
+        elif event.startswith("R") and event != "Reorder":
+            bingo = int(event[1:])
+            try:
+                the_order = sub_df.iloc[bingo]["Order_id"]
+                #print(sub_df.loc[sub_df["Order_id"] == the_order])
+                window["-date-"].update(sub_df.iloc[bingo]["Date"])
+                window["-name-"].update(sub_df.iloc[bingo]["Product Name"])
+                window["-user-"].update(sub_df.iloc[bingo]["User"])
+                window["-company-"].update(sub_df.iloc[bingo]["Company"])
+                window["-catalog-"].update(sub_df.iloc[bingo]["Catalog number"])
+                window["-desc-"].update(sub_df.iloc[bingo]["Description"])
+                window["-unit_price-"].update(sub_df.iloc[bingo]["Unit price"])
+                window["-unit_number-"].update(sub_df.iloc[bingo]["Number"])
+                window["-total_price-"].update(sub_df.iloc[bingo]["Total price"])
+                window["-req-"].update(sub_df.iloc[bingo]["Req #"])
+                window["-po-"].update(sub_df.iloc[bingo]["PO #"])
+                window["-status-"].update(sub_df.iloc[bingo]["Status"])
+                window["-location-"].update(sub_df.iloc[bingo]["Location"])
+                window["-notes-"].update(sub_df.iloc[bingo]["Notes"])
+                window["-address-"].update(sub_df.iloc[bingo]["Web address"])
+                window["-orderID-"].update(sub_df.iloc[bingo]["Order_id"])
+            except:
+                pass
 
 
-window.close()
-df = df.sort_values("Order_id", ascending = False)
-df.to_csv(".inventory.csv", index = False)
+        elif event == "New":
+            #print("Newing")
+            window["-date-"].update(date.today())
+            window["-name-"].update("")
+            window["-user-"].update("")
+            window["-company-"].update("")
+            window["-catalog-"].update("")
+            window["-desc-"].update("")
+            window["-unit_price-"].update(0.00)
+            window["-unit_number-"].update(1)
+            window["-total_price-"].update(0.00)
+            window["-req-"].update("")
+            window["-po-"].update("")
+            window["-status-"].update("Submitted")
+            window["-location-"].update("")
+            window["-notes-"].update("")
+            window["-address-"].update("")
+            window["-orderID-"].update(new_order_id)
+
+        elif event == "Update":
+            #updated_order = values["-orderID-"]
+            #print("Updating order "+updated_order)
+            #print(df.loc[df.Order_id == int(updated_order),])
+            new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
+            new_price_str = str(round(new_price, 2))
+            window["-total_price-"].update(new_price_str)
+            #print(values["-status-"])
+            df.loc[df.Order_id == int(values["-orderID-"]), "Date"] = values["-date-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Product Name"] = values["-name-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Company"] = values["-company-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Number"] = values["-unit_number-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Unit price"] = values["-unit_price-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Total price"] = values["-total_price-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Req #"] = values["-req-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "PO #"] = values["-po-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "User"] = values["-user-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Status"] = values["-status-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Catalog number"] = values["-catalog-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Description"] = values["-desc-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Location"] = values["-location-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Notes"] = values["-notes-"]
+            df.loc[df.Order_id == int(values["-orderID-"]), "Web address"] = values["-address-"]
+            sub_df = df.copy()
+            for row in range(0,10):
+                try:
+                    window[(row, 0)].update(sub_df.iloc[row]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row]["Status"])
+                except:
+                    window[(row, 0)].update("")
+                    window[(row, 1)].update("")
+                    window[(row, 2)].update("")
+                    window[(row, 3)].update("")
+                    window[(row, 4)].update("")
+                    window[(row, 5)].update("")
+                    window[(row, 6)].update("")
+                    window[(row, 7)].update("")
+
+
+        elif event == "Delete" and "the_order" in locals():
+            df = df[df.Order_id != the_order]
+            sub_df = df.copy()
+            window["-date-"].update(date.today())
+            window["-name-"].update("")
+            window["-user-"].update("")
+            window["-company-"].update("")
+            window["-catalog-"].update("")
+            window["-desc-"].update("")
+            window["-unit_price-"].update(0.00)
+            window["-unit_number-"].update(1)
+            window["-total_price-"].update(0.00)
+            window["-req-"].update("")
+            window["-po-"].update("")
+            window["-status-"].update("Submitted")
+            window["-location-"].update("")
+            window["-notes-"].update("")
+            window["-address-"].update("")
+            for row in range(0,10):
+                try:
+                    window[(row, 0)].update(sub_df.iloc[row]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row]["Status"])
+                except:
+                    window[(row, 0)].update("")
+                    window[(row, 1)].update("")
+                    window[(row, 2)].update("")
+                    window[(row, 3)].update("")
+                    window[(row, 4)].update("")
+                    window[(row, 5)].update("")
+                    window[(row, 6)].update("")
+                    window[(row, 7)].update("")
+            new_order_id = max(sub_df["Order_id"])+1
+            window["-orderID-"].update(new_order_id)
+
+        elif event == "Submit" and len(values["-name-"]) > 1:
+            new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
+            new_price_str = str(round(new_price, 2))
+            window["-total_price-"].update(new_price_str)
+            new_order = pd.DataFrame({"Order_id": [new_order_id],
+            "Date": [values["-date-"]],
+            "Product Name": [values["-name-"]],
+            "Company": [values["-company-"]],
+            "Number": [values["-unit_number-"]],
+            "Unit price": [values["-unit_price-"]],
+            "Total price": [values["-total_price-"]],
+            "Req #": [values["-req-"]],
+            "PO #": [values["-po-"]],
+            "User": [values["-user-"]],
+            "Status": [values["-status-"]],
+            "Catalog number": [values["-catalog-"]],
+            "Description": [values["-desc-"]],
+            "Location": [values["-location-"]],
+            "Notes": [values["-notes-"]],
+            "Web address": [values["-address-"]]})
+
+            df=pd.concat([new_order, df])
+            sub_df = df.copy()
+            #sort_slice("Date", False, sub_df, 0, False)
+            for row in range(0,10):
+                try:
+                    window[(row, 0)].update(sub_df.iloc[row]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row]["Status"])
+                except:
+                    window[(row, 0)].update("")
+                    window[(row, 1)].update("")
+                    window[(row, 2)].update("")
+                    window[(row, 3)].update("")
+                    window[(row, 4)].update("")
+                    window[(row, 5)].update("")
+                    window[(row, 6)].update("")
+                    window[(row, 7)].update("")
+
+            new_order_id = max(df["Order_id"])+1
+            window["-date-"].update(date.today())
+            window["-name-"].update("")
+            window["-user-"].update("")
+            window["-company-"].update("")
+            window["-catalog-"].update("")
+            window["-desc-"].update("")
+            window["-unit_price-"].update(0.00)
+            window["-unit_number-"].update(1)
+            window["-total_price-"].update(0.00)
+            window["-req-"].update("")
+            window["-po-"].update("")
+            window["-status-"].update("Submitted")
+            window["-location-"].update("")
+            window["-notes-"].update("")
+            window["-address-"].update("")
+            window["-orderID-"].update(new_order_id)
+
+        elif event == "Search":
+            #print(values["-search-"])
+            #sub_df = df
+            #sub_df["Product Name"] = sub_df["Product Name"].str.lower()
+            #print(sub_df["Product Name"])
+            jimmy = values["-search-"].lower()
+            #print(jimmy)
+            sub_df = df[df["Product Name"].str.lower().str.contains(jimmy)].copy()
+            #print(sub_df)
+            for row in range(0,10):
+                try:
+                    window[(row, 0)].update(sub_df.iloc[row]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row]["Status"])
+                except:
+                    window[(row, 0)].update("")
+                    window[(row, 1)].update("")
+                    window[(row, 2)].update("")
+                    window[(row, 3)].update("")
+                    window[(row, 4)].update("")
+                    window[(row, 5)].update("")
+                    window[(row, 6)].update("")
+                    window[(row, 7)].update("")
+
+        elif event == "-date_button-":
+            buttoni = "Date"
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            sub_df = sub_dataframe
+            ascend = asendee
+
+        elif event == "-product_button-":
+            buttoni = "Product Name"
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            ascend = asendee
+            sub_df = sub_dataframe
+
+        elif event == "-company_button-":
+            buttoni = "Company"
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            ascend = asendee
+            sub_df = sub_dataframe
+
+        elif event == "-price_button-":
+            buttoni = "Total price"
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            ascend = asendee
+            sub_df = sub_dataframe
+
+        elif event == "-req_button-":
+            buttoni = "Req #"
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            ascend = asendee
+            sub_df = sub_dataframe
+
+        elif event == "-po_button-":
+            buttoni = "PO #"
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            ascend = asendee
+            sub_df = sub_dataframe
+
+        elif event == "-user_button-":
+            buttoni = "User"
+            #print(users)
+            #print(firt_user)
+            #print(users[firt_user])
+            sub_df = df[df["User"].str.contains(users[firt_user])].copy()
+            if firt_user == len(users)-1:
+                firt_user = 0
+            else:
+                firt_user+=1
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            ascend = asendee
+            sub_df = sub_dataframe
+
+        elif event == "-status_button-":
+            buttoni = "Status"
+            sub_df = df[df["Status"].str.contains(u_statuses[first_status])].copy()
+            if first_status == len(u_statuses)-1:
+                first_status = 0
+            else:
+                first_status+=1
+
+            sort_slice(buttoni, ascend, sub_df, 0, True)
+            ascend = asendee
+            sub_df = sub_dataframe
+
+        elif event == "-next-" and len(sub_df) > start_slice+10:
+            start_slice += 10
+            sort_slice(buttoni, ascend, sub_df, start_slice, False)
+            sub_df = sub_dataframe
+
+        elif event == "-previous-" and start_slice > 0:
+            start_slice -= 10
+            sort_slice(buttoni, ascend, sub_df, start_slice, False)
+            sub_df = sub_dataframe
+
+
+    window.close()
+
+    if locked_file != True:
+        os.remove(".lock_file")
+        df = df.sort_values("Order_id", ascending = False)
+        df.to_csv(".inventory.csv", index = False)
