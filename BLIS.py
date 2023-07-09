@@ -159,20 +159,30 @@ material_entry_column = [
     sg.Combo(statuses, key = "-status-", default_value = statuses[0]),
     sg.Button("Update"),],
     sg.Text("Notes"),
-    sg.Multiline(size = (40,5), default_text = "", key = "-notes-"),
+    sg.Multiline(size = (90,5), default_text = "", key = "-notes-"),
     sg.Push(),
+    sg.Button("Submit"),
 ]
 # Third column shows the item image and the procedurally generated description
 main_font=("Arial bold", 11)
 inv_header = [
     [sg.Push(),
+    sg.Push(),
+    sg.Push(),
     sg.Button("Date", pad = (0,0), size = (12,1), key="-date_button-"),
+    sg.Push(),
     sg.Button("Product Name", pad = (0,0), size = (12,1),  key="-product_button-"),
+    sg.Push(),
     sg.Button("Company", pad = (0,0), size = (12,1),  key="-company_button-"),
+    sg.Push(),
     sg.Button("Price", pad = (0,0), size = (12,1),  key="-price_button-"),
+    sg.Push(),
     sg.Button("Req #", pad = (0,0), size = (12,1),  key="-req_button-"),
+    sg.Push(),
     sg.Button("PO #", pad = (0,0), size = (12,1),  key="-po_button-"),
+    sg.Push(),
     sg.Button("User", pad = (0,0), size = (12,1),  key="-user_button-"),
+    sg.Push(),
     sg.Button("Status", pad = (0,0), size = (12,1),  key="-status_button-")],
 
 ]
@@ -211,7 +221,6 @@ layout=[
     sg.Input("", key="-search-"),
     sg.Push(),
     sg.Button("New"),
-    sg.Button("Submit"),
     sg.Button("Reorder"),
     sg.Push(),
     sg.Text("Order#"),
@@ -594,5 +603,5 @@ else:
 
     if locked_file != True:
         os.remove(".lock_file")
-        df = df.sort_values("Order_id", ascending = False)
+        df = df.sort_values("Date", ascending = False)
         df.to_csv(".inventory.csv", index = False)
