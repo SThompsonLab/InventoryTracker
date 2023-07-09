@@ -257,34 +257,32 @@ else:
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
 
-    #    elif event == "Update" and values["-status-"] == "Received" and values["-location-"] == "":
-    #        popup_location()
-
+        # If a row radial button is pressed, its information is loaded into the lines
         elif event.startswith("R") and event != "Reorder":
             bingo = int(event[1:])
             try:
                 the_order = sub_df.iloc[bingo]["Order_id"]
                 #print(sub_df.loc[sub_df["Order_id"] == the_order])
-                window["-date-"].update(sub_df.iloc[bingo]["Date"])
-                window["-name-"].update(sub_df.iloc[bingo]["Product Name"])
-                window["-user-"].update(sub_df.iloc[bingo]["User"])
-                window["-company-"].update(sub_df.iloc[bingo]["Company"])
-                window["-catalog-"].update(sub_df.iloc[bingo]["Catalog number"])
-                window["-desc-"].update(sub_df.iloc[bingo]["Description"])
-                window["-unit_price-"].update(sub_df.iloc[bingo]["Unit price"])
-                window["-unit_number-"].update(sub_df.iloc[bingo]["Number"])
-                window["-total_price-"].update(sub_df.iloc[bingo]["Total price"])
-                window["-req-"].update(sub_df.iloc[bingo]["Req #"])
-                window["-po-"].update(sub_df.iloc[bingo]["PO #"])
-                window["-status-"].update(sub_df.iloc[bingo]["Status"])
-                window["-location-"].update(sub_df.iloc[bingo]["Location"])
-                window["-notes-"].update(sub_df.iloc[bingo]["Notes"])
-                window["-address-"].update(sub_df.iloc[bingo]["Web address"])
-                window["-orderID-"].update(sub_df.iloc[bingo]["Order_id"])
+                window["-date-"].update(sub_df.iloc[bingo+start_slice]["Date"])
+                window["-name-"].update(sub_df.iloc[bingo+start_slice]["Product Name"])
+                window["-user-"].update(sub_df.iloc[bingo+start_slice]["User"])
+                window["-company-"].update(sub_df.iloc[bingo+start_slice]["Company"])
+                window["-catalog-"].update(sub_df.iloc[bingo+start_slice]["Catalog number"])
+                window["-desc-"].update(sub_df.iloc[bingo+start_slice]["Description"])
+                window["-unit_price-"].update(sub_df.iloc[bingo+start_slice]["Unit price"])
+                window["-unit_number-"].update(sub_df.iloc[bingo+start_slice]["Number"])
+                window["-total_price-"].update(sub_df.iloc[bingo+start_slice]["Total price"])
+                window["-req-"].update(sub_df.iloc[bingo+start_slice]["Req #"])
+                window["-po-"].update(sub_df.iloc[bingo+start_slice]["PO #"])
+                window["-status-"].update(sub_df.iloc[bingo+start_slice]["Status"])
+                window["-location-"].update(sub_df.iloc[bingo+start_slice]["Location"])
+                window["-notes-"].update(sub_df.iloc[bingo+start_slice]["Notes"])
+                window["-address-"].update(sub_df.iloc[bingo+start_slice]["Web address"])
+                window["-orderID-"].update(sub_df.iloc[bingo+start_slice]["Order_id"])
             except:
                 pass
 
-
+        # Clears the fields for a new order
         elif event == "New":
             #print("Newing")
             window["-date-"].update(date.today())
@@ -304,14 +302,12 @@ else:
             window["-address-"].update("")
             window["-orderID-"].update(new_order_id)
 
+        # Updates values
         elif event == "Update":
-            #updated_order = values["-orderID-"]
-            #print("Updating order "+updated_order)
-            #print(df.loc[df.Order_id == int(updated_order),])
             new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
             new_price_str = str(round(new_price, 2))
             window["-total_price-"].update(new_price_str)
-            #print(values["-status-"])
+
             df.loc[df.Order_id == int(values["-orderID-"]), "Date"] = values["-date-"]
             df.loc[df.Order_id == int(values["-orderID-"]), "Product Name"] = values["-name-"]
             df.loc[df.Order_id == int(values["-orderID-"]), "Company"] = values["-company-"]
@@ -348,7 +344,7 @@ else:
                     window[(row, 6)].update("")
                     window[(row, 7)].update("")
 
-
+        # Deletes the current selected order
         elif event == "Delete" and "the_order" in locals():
             df = df[df.Order_id != the_order]
             sub_df = df.copy()
@@ -389,7 +385,9 @@ else:
             new_order_id = max(sub_df["Order_id"])+1
             window["-orderID-"].update(new_order_id)
 
+        # Adds new order to the stack
         elif event == "Submit" and len(values["-name-"]) > 1:
+            start_slice = 0
             new_price = int(values["-unit_number-"])*float(values["-unit_price-"])
             new_price_str = str(round(new_price, 2))
             window["-total_price-"].update(new_price_str)
@@ -451,15 +449,13 @@ else:
             window["-address-"].update("")
             window["-orderID-"].update(new_order_id)
 
+        # Searches for matches in product name
         elif event == "Search":
-            #print(values["-search-"])
-            #sub_df = df
-            #sub_df["Product Name"] = sub_df["Product Name"].str.lower()
-            #print(sub_df["Product Name"])
+            start_slice = 0
+
             jimmy = values["-search-"].lower()
-            #print(jimmy)
             sub_df = df[df["Product Name"].str.lower().str.contains(jimmy)].copy()
-            #print(sub_df)
+
             for row in range(0,10):
                 try:
                     window[(row, 0)].update(sub_df.iloc[row]["Date"])
@@ -482,45 +478,49 @@ else:
 
         elif event == "-date_button-":
             buttoni = "Date"
+            start_slice = 0
             sort_slice(buttoni, ascend, sub_df, 0, True)
             sub_df = sub_dataframe
             ascend = asendee
 
         elif event == "-product_button-":
             buttoni = "Product Name"
+            start_slice = 0
             sort_slice(buttoni, ascend, sub_df, 0, True)
             ascend = asendee
             sub_df = sub_dataframe
 
         elif event == "-company_button-":
+            start_slice = 0
             buttoni = "Company"
             sort_slice(buttoni, ascend, sub_df, 0, True)
             ascend = asendee
             sub_df = sub_dataframe
 
         elif event == "-price_button-":
+            start_slice = 0
             buttoni = "Total price"
             sort_slice(buttoni, ascend, sub_df, 0, True)
             ascend = asendee
             sub_df = sub_dataframe
 
         elif event == "-req_button-":
+            start_slice = 0
             buttoni = "Req #"
             sort_slice(buttoni, ascend, sub_df, 0, True)
             ascend = asendee
             sub_df = sub_dataframe
 
         elif event == "-po_button-":
+            start_slice = 0
             buttoni = "PO #"
             sort_slice(buttoni, ascend, sub_df, 0, True)
             ascend = asendee
             sub_df = sub_dataframe
 
         elif event == "-user_button-":
+            start_slice = 0
             buttoni = "User"
-            #print(users)
-            #print(firt_user)
-            #print(users[firt_user])
             sub_df = df[df["User"].str.contains(users[firt_user])].copy()
             if firt_user == len(users)-1:
                 firt_user = 0
@@ -531,6 +531,7 @@ else:
             sub_df = sub_dataframe
 
         elif event == "-status_button-":
+            start_slice = 0
             buttoni = "Status"
             sub_df = df[df["Status"].str.contains(u_statuses[first_status])].copy()
             if first_status == len(u_statuses)-1:
@@ -544,13 +545,49 @@ else:
 
         elif event == "-next-" and len(sub_df) > start_slice+10:
             start_slice += 10
-            sort_slice(buttoni, ascend, sub_df, start_slice, False)
-            sub_df = sub_dataframe
+            #print(start_slice)
+            for row in range(0,10):
+                try:
+                    window[(row, 0)].update(sub_df.iloc[row+start_slice]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row+start_slice]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row+start_slice]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row+start_slice]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row+start_slice]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row+start_slice]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row+start_slice]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row+start_slice]["Status"])
+                except:
+                    window[(row, 0)].update("")
+                    window[(row, 1)].update("")
+                    window[(row, 2)].update("")
+                    window[(row, 3)].update("")
+                    window[(row, 4)].update("")
+                    window[(row, 5)].update("")
+                    window[(row, 6)].update("")
+                    window[(row, 7)].update("")
+
 
         elif event == "-previous-" and start_slice > 0:
             start_slice -= 10
-            sort_slice(buttoni, ascend, sub_df, start_slice, False)
-            sub_df = sub_dataframe
+            for row in range(0,10):
+                try:
+                    window[(row, 0)].update(sub_df.iloc[row+start_slice]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row+start_slice]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row+start_slice]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row+start_slice]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row+start_slice]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row+start_slice]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row+start_slice]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row+start_slice]["Status"])
+                except:
+                    window[(row, 0)].update("")
+                    window[(row, 1)].update("")
+                    window[(row, 2)].update("")
+                    window[(row, 3)].update("")
+                    window[(row, 4)].update("")
+                    window[(row, 5)].update("")
+                    window[(row, 6)].update("")
+                    window[(row, 7)].update("")
 
 
     window.close()
