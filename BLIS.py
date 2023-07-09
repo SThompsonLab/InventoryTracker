@@ -53,6 +53,8 @@ wd = os.getcwd()
 if ".inventory.csv" in os.listdir():
     df = pd.read_csv(".inventory.csv")
     #print("Found it")
+    #print(len(df["Order_id"]))
+
 else:
     tempDF = {"Order_id": [],
                 "Date": [],
@@ -89,7 +91,11 @@ u_statuses = list(df["Status"].unique())
 first_status = 0
 
 companies = list(df["Company"].unique())
-new_order_id = max(df["Order_id"])+1
+
+if len(df["Order_id"]) > 0:
+    new_order_id = max(df["Order_id"])+1
+else:
+    new_order_id = 1
 
 log_header = [
     "Date",
@@ -153,7 +159,7 @@ material_entry_column = [
     sg.Combo(statuses, key = "-status-", default_value = statuses[0]),
     sg.Button("Update"),],
     sg.Text("Notes"),
-    sg.Multiline(size = (40,5), default_text = wd, key = "-notes-"),
+    sg.Multiline(size = (40,5), default_text = "", key = "-notes-"),
     sg.Push(),
 ]
 # Third column shows the item image and the procedurally generated description
