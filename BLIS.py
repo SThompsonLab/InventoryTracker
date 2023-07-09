@@ -261,7 +261,7 @@ else:
         elif event.startswith("R") and event != "Reorder":
             bingo = int(event[1:])
             try:
-                the_order = sub_df.iloc[bingo]["Order_id"]
+                the_order = sub_df.iloc[bingo+start_slice]["Order_id"]
                 #print(sub_df.loc[sub_df["Order_id"] == the_order])
                 window["-date-"].update(sub_df.iloc[bingo+start_slice]["Date"])
                 window["-name-"].update(sub_df.iloc[bingo+start_slice]["Product Name"])
@@ -326,14 +326,14 @@ else:
             sub_df = df.copy()
             for row in range(0,10):
                 try:
-                    window[(row, 0)].update(sub_df.iloc[row]["Date"])
-                    window[(row, 1)].update(sub_df.iloc[row]["Product Name"])
-                    window[(row, 2)].update(sub_df.iloc[row]["Company"])
-                    window[(row, 3)].update(sub_df.iloc[row]["Total price"])
-                    window[(row, 4)].update(sub_df.iloc[row]["Req #"])
-                    window[(row, 5)].update(sub_df.iloc[row]["PO #"])
-                    window[(row, 6)].update(sub_df.iloc[row]["User"])
-                    window[(row, 7)].update(sub_df.iloc[row]["Status"])
+                    window[(row, 0)].update(sub_df.iloc[row+start_slice]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row+start_slice]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row+start_slice]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row+start_slice]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row+start_slice]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row+start_slice]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row+start_slice]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row+start_slice]["Status"])
                 except:
                     window[(row, 0)].update("")
                     window[(row, 1)].update("")
@@ -365,14 +365,14 @@ else:
             window["-address-"].update("")
             for row in range(0,10):
                 try:
-                    window[(row, 0)].update(sub_df.iloc[row]["Date"])
-                    window[(row, 1)].update(sub_df.iloc[row]["Product Name"])
-                    window[(row, 2)].update(sub_df.iloc[row]["Company"])
-                    window[(row, 3)].update(sub_df.iloc[row]["Total price"])
-                    window[(row, 4)].update(sub_df.iloc[row]["Req #"])
-                    window[(row, 5)].update(sub_df.iloc[row]["PO #"])
-                    window[(row, 6)].update(sub_df.iloc[row]["User"])
-                    window[(row, 7)].update(sub_df.iloc[row]["Status"])
+                    window[(row, 0)].update(sub_df.iloc[row+start_slice]["Date"])
+                    window[(row, 1)].update(sub_df.iloc[row+start_slice]["Product Name"])
+                    window[(row, 2)].update(sub_df.iloc[row+start_slice]["Company"])
+                    window[(row, 3)].update(sub_df.iloc[row+start_slice]["Total price"])
+                    window[(row, 4)].update(sub_df.iloc[row+start_slice]["Req #"])
+                    window[(row, 5)].update(sub_df.iloc[row+start_slice]["PO #"])
+                    window[(row, 6)].update(sub_df.iloc[row+start_slice]["User"])
+                    window[(row, 7)].update(sub_df.iloc[row+start_slice]["Status"])
                 except:
                     window[(row, 0)].update("")
                     window[(row, 1)].update("")
