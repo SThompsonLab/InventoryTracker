@@ -252,7 +252,7 @@ if locked_file:
 
 
 else:
-    window=sg.Window("Lab Inventory System", layout)
+    window=sg.Window("BLIS: Basic Lab Inventory System", layout)
     start_slice = 0
     ascend = True
     buttoni = "Date"
