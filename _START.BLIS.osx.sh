@@ -10,6 +10,15 @@
 #
 cd $(dirname $0)
 
+if [ ! -e '/Volumes/Thompson-Lab$' ]; then 
+	echo " "
+	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+	echo '!!! ERROR: Thompson-Lab$ not connected: VPN and mount fileshare  !!!'
+	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+	echo " "
+	exit 1
+fi
+
 if [ ! -e .inventory.csv ]; then 
 	echo "Linking to /Volumes/Thompson-Lab$/Drop/BLIS/.inventory.csv"
 	ln -sf /Volumes/Thompson-Lab$/Drop/BLIS/.inventory.csv .
