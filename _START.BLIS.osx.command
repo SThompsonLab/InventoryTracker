@@ -5,24 +5,32 @@
 # in which the script lives. 
 #
 # So, CD to the script's directory, so we can find 
-# the .BLIS requires 
+# the .inventory.csv BLIS requires 
 # which should be a symlink to the shared file on the server
+#
+# ACTUALLY, BLIS now creates a lock file, so rather than going to 
+# the local install directory (which has only the test .inventory.csv, 
+# and no shared lock file), we will run with CWD set to the shared
+# network drive, so users can see each other's lock files
 #
 cd $(dirname $0)
 
-if [ ! -e '/Volumes/Thompson-Lab$' ]; then 
+SHARED_DISK=/Volumes/Thompson-Lab$/Drop/BLIS
+
+if [ ! -e "$SHARED_DISK" ]; then 
 	echo " "
 	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-	echo '!!! ERROR: Thompson-Lab$ not connected: VPN and mount fileshare  !!!'
+	echo '!!! ERROR: $SHARED_DISK not connected: VPN and mount fileshare  !!!'
 	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 	echo " "
 	exit 1
 fi
 
-if [ ! -e .inventory.csv ]; then 
-	echo "Linking to /Volumes/Thompson-Lab$/Drop/BLIS/.inventory.csv"
-	ln -sf /Volumes/Thompson-Lab$/Drop/BLIS/.inventory.csv .
-fi
+# 
+# move to shared location
+#
+cd $SHARED_DISK
+
 #
 # run the correct exe for the CPU type
 #
