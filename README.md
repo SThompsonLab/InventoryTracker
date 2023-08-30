@@ -22,6 +22,6 @@ To "install":
    * create the folder
        * ```mkdir /Applications/BLIS/``` 
    * copy the files there:
-       * ```cp BLIS.osx.arm BLIS.osx.i386 _START_BLIS.osx.command /Applications/BLIS/```
+       * ```cp -a BLIS.osx.arm BLIS.osx.i386 _START.BLIS.osx.command /Applications/BLIS/```
 
 
