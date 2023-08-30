@@ -13,9 +13,10 @@
 # and no shared lock file), we will run with CWD set to the shared
 # network drive, so users can see each other's lock files
 #
-cd $(dirname $0)
-
+INSTALL_DIR=$(dirname $0)
+echo INSTALL_DIR=$INSTALL_DIR
 SHARED_DISK=/Volumes/Thompson-Lab$/Drop/BLIS
+echo SHARED_DISK=$SHARED_DISK
 
 if [ ! -e "$SHARED_DISK" ]; then 
 	echo " "
@@ -29,11 +30,13 @@ fi
 # 
 # move to shared location
 #
+echo cd $SHARED_DISK
 cd $SHARED_DISK
 
 #
 # run the correct exe for the CPU type
 #
-exec ./BLIS.osx.$(uname -p)
+echo exec $INSTALL_DIR/BLIS.osx.$(uname -p)
+exec $INSTALL_DIR/BLIS.osx.$(uname -p)
 
 
