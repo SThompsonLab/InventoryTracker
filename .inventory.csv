@@ -1,2 +1,2 @@
-Order_id,Date,Product Name,Company,Number,Unit price,Total price,Req #,PO #,User,Status,Catalog number,Description,Location,Notes,Web address,Project,Unnamed: 16,Unnamed: 18,Unnamed: 19[34m^M[m
-3068,2023-02-08,TRK inhibitor,SelleckChem,1,147.0,147.0,,,Favorite Grad Student,Received,S45634,"Inhibitor for TRK1, 2, and 3 and kils cells dead",Cell culture room,,www.selleckChem.com/trki,,,,
+Order_id,Date,Product Name,Company,Number,Unit price,Total price,Req #,PO #,User,Status,Catalog number,Description,Location,Notes,Web address,Project
+1,2023-02-08,TRK inhibitor,SelleckChem,1,147,147,,,Favorite Grad Student,Received,S45634,"Inhibitor for TRK1, 2, and 3 and kills cells dead",Cell culture room,None,www.selleckChem.com/trki,
